@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 import sys
 import datetime
-# from dateutil import parser
 import sqlite3
 from sqlite3 import Error
 
@@ -21,17 +20,23 @@ def open_db(dfile):
 
 def main(argv):
 	if len(argv) == 1:
-		print("Usage: " + argv[0] + " <places.sqlite>")
+		print("Usage: " + argv[0] + " <places.sqlite> [days_to_show]")
 		sys.exit(1)
 
 	conn = open_db(argv[1])
 	if conn is None:
 		sys.exit(2)
 
-	when = datetime.datetime.now() - datetime.timedelta(days=1)
+	days_to_show = 1
+	if (len(argv)) == 3:
+		days_to_show = int(argv[2])
+	if days_to_show == 0:
+		days_to_show = 1
+
+	when = datetime.datetime.now() - datetime.timedelta(days=days_to_show)
 	when = int(when.timestamp() * 1000000)
 	cur = conn.cursor()
-	sql = "SELECT title, url, visit_count FROM moz_places WHERE last_visit_date > " + str(when) + " ORDER BY last_visit_date"
+	sql = "SELECT title, url, visit_count FROM moz_places WHERE last_visit_date > " + str(when) + " ORDER BY url"
 	cur.execute(sql)
 	rows = cur.fetchall()
 
